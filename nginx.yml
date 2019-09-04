@@ -1,0 +1,26 @@
+---
+- name: "install nginx"
+  hosts: "all"
+  become: "true"
+
+  tasks: 
+   - name: "Add epel-release repo"
+     yum:
+       name: "epel-release"
+       state: "present"
+   - name: "install nginx"
+     yum:
+      name: "nginx"
+      state: "present"
+
+   - name: "start NGINX"
+     service:
+      name: "nginx"
+      state: "started"
+      enabled: "yes" 
+   - name: "copy index.html" 
+     copy:
+      src: "index.html"
+      dest: "/usr/share/nginx/html/index.html"
+      
+      
