@@ -1,0 +1,19 @@
+---
+# tasks file for user
+#
+- name: add new user "{{ user }}"
+  user:
+    name: "{{ user }}"
+    shell: /bin/bash
+    append: yes
+- name: Set authorized key taken from file
+  authorized_key:
+    user: "{{ user }}"
+    state: present
+    key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+- name: set sudo right
+  template:
+    src: sudo.j2
+    dest: /etc/sudoers.d/{{ user }}
+
+

@@ -1,0 +1,17 @@
+---
+# defaults file for ngin
+php_packages:
+- php7.3
+- php7.3-gd
+- php7.3-cgi
+- php7.3-fpm
+- php7.3-mysql
+- php7.3-curl
+- php7.3-common
+php_timezone: "europe/Paris"
+php_upload_max_filesize : "20M"
+php_post_max_size: "20M"
+php_memory_limit: "1024M"
+
+
+

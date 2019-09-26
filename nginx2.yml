@@ -1,0 +1,61 @@
+
+
+
+
+---
+- name: Install nginx
+  hosts: all
+  become: true
+
+  tasks:
+  
+  - name: update package
+    yum:
+     update_cache: yes
+
+  - name: Add epel-release repo
+    yum:
+      name: epel-release
+      state: present
+
+  - name: Install nginx
+    yum:
+      name: nginx
+      state: latest
+  - name:
+    service:
+     name: nginx
+     state: started
+     enabled: yes
+
+  - name: create a directory 
+    file:
+     path:  /usr/share/nginx/monsite1.org/
+     state: directory
+     
+  - name: create a directory
+    file:
+     path: /usr/share/nginx/monsite2.edu/
+     state: directory
+    
+
+  - name: Insert Index Page
+    copy:
+      src: /etc/ansible/playbook/index1.html
+      dest: /usr/share/nginx/monsite1.org/index.html
+
+  - name: Insert Index Page
+    copy:
+      src: /etc/ansible/playbook/index2.html
+      dest: /usr/share/nginx/monsite2.edu/index.html
+  - name: Insert nginx.conf
+    copy:
+      src: /etc/nginx/nginx.conf
+      dest: /etc/nginx/nginx.conf
+
+
+
+  - name: Start nginx
+    service:
+      name: nginx
+      state: restarted

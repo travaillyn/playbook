@@ -1,0 +1,25 @@
+---
+- name: creer un utilisateur
+  hosts: all
+  vars:
+    user: ham
+  tasks:
+  - name: Create an user
+    user:
+      name: "{{ user }}"
+      shell: /bin/bash
+      append: yes
+   
+
+  - name: Set authorized key taken from file
+    authorized_key:
+     user: "{{ user }}"
+     state: present
+     key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+
+  - name: Insert sudoers.d
+    copy:
+      src: /etc/ansible/sudo.txt
+      dest: /etc/sudoers.d/sudo
+
+

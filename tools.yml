@@ -1,0 +1,11 @@
+---
+- name: installer tools
+  hosts: all
+  tasks:
+  - name: installation tools
+    yum: name={{ item }} update_cache=yes state=latest
+    with_items:
+     - htop
+     - git
+     - zsh
+     - sudo

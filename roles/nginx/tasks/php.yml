@@ -1,0 +1,4 @@
+---
+
+- name : installation de php
+  apt : name={{ item }} state=present

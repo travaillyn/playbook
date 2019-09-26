@@ -1,0 +1,13 @@
+
+
+
+- name: "Installation mariadb"
+  hosts: db
+  vars:
+   remote_user: hami
+   become: yes
+   become_method: sudo
+   ansible_become_pass: "hami"
+  roles:
+     - mariadb
+

@@ -1,0 +1,71 @@
+---
+- name:
+  hosts: all
+  
+  vars:
+    create_containers: 4
+    default_container_name: docker
+    default_container_image: centos
+    default_container_command: sleep 1d
+  tasks:
+  - name: update
+    apt:
+      update_cache: yes
+  - name: install package
+    apt:
+      name: "{{ package }}" 
+      update-cache: yes
+      state: latest
+    vars:
+       package:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg2
+        - software-properties-common
+        - python-pip
+
+  - name: Add Apt signing key from official docker repo
+    apt_key:
+      url: https://download.docker.com/linux/debian/gpg
+      state: present
+  - name: add docker official repository for Debian Stretch
+    apt_repository:
+      repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+      state: present
+  - name: actually install docker
+    apt:
+      name: "docker-ce"
+      state: latest
+  - name: install python modules (for older versions of OS)
+    pip:
+     name: "{{item}}"
+     state: present
+    with_items:
+    - urllib3
+    - pyOpenSSL
+    - ndg-httpsclient
+    - pyasn1
+  - name: instal python-docker
+    apt:
+      name: python-docker
+      update_cache: yes
+
+  - name: Pull  Docker image
+    docker_image:
+      name: "{{ default_container_image }}"
+      source: pull
+  - name: creer conteneur
+    docker_container:
+      name: "{{ default_container_name }}{{item}}"
+      image: "{{ default_container_image }}"
+      command: "{{ default_container_command }}"
+     # state: present
+    with_sequence: count=4
+
+
+  
+   
+   
+   
+ 

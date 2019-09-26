@@ -1,0 +1,50 @@
+---
+
+- hosts: local
+  connection: local
+  gather_facts: False
+  vars:
+   instance_type: t2.large
+   security_group: lynda
+   image: ami-0a1f49a762473adbd
+   keypair: keys_brazillyn
+   region: sa-east-1
+   count: 1
+  vars_files:
+   - aws_keys.yml
+  tasks:
+   - name: Create a security group
+     ec2_group:
+       name: "{{ security_group }}"
+       description: The webservers security group
+       region: "{{ region }}"
+       aws_access_key: "{{ aws_access_key }}"
+       aws_secret_key: "{{ aws_secret_key }}"
+       rules:
+         - proto: tcp
+           from_port: 22
+           to_port: 22
+           cidr_ip: 0.0.0.0/0
+         - proto: tcp
+           from_port: 80
+           to_port: 80
+           cidr_ip: 0.0.0.0/0
+         - proto: tcp
+           from_port: 443
+           to_port: 443
+           cidr_ip: 0.0.0.0/0
+       rules_egress:
+         - proto: all
+           cidr_ip: 0.0.0.0/0
+   - name: Launch the new EC2 Instance
+     ec2:
+       aws_access_key: "{{ aws_access_key }}"
+       aws_secret_key: "{{ aws_secret_key }}"
+       group: "{{ security_group }}"
+       instance_type: "{{ instance_type }}"
+       image: "{{ image }}"
+       wait: true
+       region: "{{ region }}"
+       keypair: "{{ keypair }}"
+       count: "{{count}}"
+     register: ec2

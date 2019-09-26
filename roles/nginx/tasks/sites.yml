@@ -1,0 +1,27 @@
+
+
+- name: creation de repertoire
+  file:
+    path: /home/{{ user }}/{{ item.domain }}
+    state: directory
+    owner: "{{ user }}"
+    mode: "0755"
+- name: lien vers www
+  become: yes
+  file:
+    src: /home/{{ user }}/{{ item.domain }}
+    dest: /var/www/{{ item.domain }}
+    state: link
+  notify: nginx reloaded
+- name: creation conf nginx
+  template:
+    src: nginx.j2
+    dest: /etc/nginx/sites-available/{{ item.domain }}
+    force: yes 
+  become: yes
+- name: activation de domaine
+  file:
+    src: /etc/nginx/sites-available/{{ item.domain }}
+    dest: /etc/nginx/sites-enabled/{{ item.domain }}
+    state: link
+  become: yes

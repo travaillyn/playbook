@@ -1,0 +1,79 @@
+---
+#- name: "AWS - Install docker"
+- hosts: aws
+  become: yes
+  vars:
+   gitlab_config_dir: "/srv/gitlab/config"
+   gitlab_logs_dir: "/srv/gitlab/logs"
+   gitlab_data_dir: "/srv/gitlab/data"
+   gitlab_image: "gitlab/gitlab-ce:latest"
+   gitlab_ssh_port: "2222"
+   gitlab_https_port: "443"
+   gitlab_http_port: "80"
+  tasks:
+    - name: Update all packages
+      yum:
+        name: '*'
+        state: latest
+        update_only: yes
+
+    - name: Ensure a list of yum packages are installed
+      yum:
+        name: "{{ packages }}"
+        state: latest
+        update_cache: yes
+      vars:
+        packages:
+        - python-pip
+        - yum-utils
+        - device-mapper-persistent-data
+        - lvm2
+        - amazon-linux-extras
+
+    - name: Add extras repository
+      shell: yum-config-manager --enable extras
+
+    - name: Install docker-ce (centos) via amazon-linux-extras packages
+      shell: "amazon-linux-extras install docker=18.06.1 -y"
+
+    - name: Enable Docker CE service at startup
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Ensure Python pip packages are installed
+      pip:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - boto
+        - boto3
+        - docker-compose
+    - name: Create gitlab directories
+      file: path={{ item }} recurse=yes state=directory
+      with_items:
+      - "{{ gitlab_config_dir }}"
+      - "{{ gitlab_logs_dir }}"
+      - "{{ gitlab_data_dir }}"
+    - name: Pull  Docker image
+      docker_image:
+       name:  "{{ gitlab_image }}"
+       source: pull
+
+
+    - name: Install Gitlab container
+      docker_container:
+       name: gitlab
+       image: "{{ gitlab_image }}"
+       state: started
+       ports:
+#        - "{{ gitlab_ssh_port }}:22"
+        - "{{ gitlab_http_port }}:80"
+        - "{{ gitlab_https_port }}:443"
+       volumes:
+        - "{{ gitlab_config_dir }}:/etc/gitlab"
+        - "{{ gitlab_logs_dir }}:/var/log/gitlab"
+        - "{{ gitlab_data_dir }}:/var/opt/gitlab"
+       restart_policy: always
+

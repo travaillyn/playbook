@@ -1,0 +1,48 @@
+---
+# tasks file for nginx
+- name: installation nginx
+  apt: name=nginx state=latest
+
+- name: start nginx
+  become: yes
+  service: name=nginx state=started enabled=true
+
+- name: supprimer default
+  become: yes
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify: nginx reloaded
+
+#- name: ajout php
+#  include: php.yml
+
+- name: configuration des sites {{ domains }}
+  include: sites.yml
+  with_items: "{{ domains }}"
+- name: instalation de pachages
+  include: php.yml
+  with_items: "{{ php_packages}}" 
+
+- name: Set date.timezone for FPM
+  become: true
+  lineinfile:
+    path: /etc/php/7.3/fpm/php.ini
+    regexp: "date.timezone ="
+    line:  "date.timezone = {{ php_timezone }}"
+- name: Set upload max file size for FPM
+  become: true
+  lineinfile:
+    path: /etc/php/7.3/fpm/php.ini
+    regexp: "upload_max_filesize = "
+    line: "upload_max_filesize = {{ php_upload_max_filesize }}"
+- name: Set post max size for FPM
+  become: true
+  lineinfile:
+    path: /etc/php/7.3/fpm/php.ini
+    regexp: "post_max_size ="
+    line: "post_max_size = {{ php_post_max_size }}"
+- name: Set memory limit for FPM
+  become: true
+  lineinfile:
+    path: /etc/php/7.3/fpm/php.ini
+    regexp: "memory_limit ="
+    line: "memory_limit = {{ php_memory_limit }} "
